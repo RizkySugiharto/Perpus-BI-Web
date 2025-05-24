@@ -36,7 +36,12 @@
         </div>
     </nav>
     <main class="p-5">
-        <h2 class="mb-3">Data Buku</h2>
+        <div class="d-flex flex-row justify-content-between align-items-center mb-3">
+            <h2>Data Buku</h2>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
+                Tambah
+            </button>
+        </div>
         <div class="table-responsive">
             <table class="table table-primary table-bordered">
                 <thead>
@@ -55,6 +60,88 @@
             </table>
         </div>
     </main>
+
+    <!-- Modals -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-black">
+                    <h1 class="modal-title fs-5" id="createModalLabel">Tambah Buku</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-black">
+                    <form action="#" method="get" onclick="return false;">
+                        <div class="mb-3">
+                            <label for="title">Judul: </label>
+                            <input type="text" name="title" id="title" class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="author">Pengarang: </label>
+                            <input type="text" name="author" id="author" class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publisher">Penerbit: </label>
+                            <input type="text" name="publisher" id="publisher" class="form-control border-black"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="published-year">Tahun Terbit: </label>
+                            <input type="number" name="published-year" id="published-year"
+                                class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock">Stok: </label>
+                            <input type="number" name="stock" id="stock" class="form-control border-black" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-black">
+                    <button type="button" class="btn btn-success" onclick="create()" data-bs-dismiss="modal">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-black">
+                    <h1 class="modal-title fs-5" id="editModalLabel">Edit Buku</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-black">
+                    <form action="#" method="get" onclick="return false;">
+                        <input type="hidden" name="bookId" id="bookId">
+                        <div class="mb-3">
+                            <label for="title">Judul: </label>
+                            <input type="text" name="title" id="title" class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="author">Pengarang: </label>
+                            <input type="text" name="author" id="author" class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publisher">Penerbit: </label>
+                            <input type="text" name="publisher" id="publisher" class="form-control border-black"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="published-year">Tahun Terbit: </label>
+                            <input type="number" name="published-year" id="published-year"
+                                class="form-control border-black" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock">Stok: </label>
+                            <input type="number" name="stock" id="stock" class="form-control border-black" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-black">
+                    <button type="button" class="btn btn-primary" id="btn-edit" data-bs-dismiss="modal" onclick="edit()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
@@ -69,7 +156,7 @@
         {
             withCredentials: true,
             headers: {
-                'Access-Control-Allow-Origin': '*', 
+                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json'
             }
         }
@@ -85,12 +172,132 @@
                 <td class="bg-white">${book.published_year}</td>
                 <td class="bg-white">${book.stock}</td>
                 <td class="bg-white">
-                    <button class="btn btn-primary" onclick="edit(${book.book_id})">Edit</button>
-                    <button class="btn btn-danger" onclick="delete(${book.book_id})">Hapus</button>
+                    <button class="btn btn-primary" onclick="showEdit(${book.book_id})" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                    <button class="btn btn-danger" onclick="_delete(${book.book_id})">Hapus</button>
                 </td>
             </tr>
             `);
         })
     });
+
+    function create() {
+        const title = $('#createModal #title').val();
+        const author = $('#createModal #author').val();
+        const publisher = $('#createModal #publisher').val();
+        const publishedYear = $('#createModal #published-year').val();
+        const stock = $('#createModal #stock').val();
+
+        axios.post(
+            `${BASE_URL}/books`,
+            {
+                title: title,
+                author: author,
+                publisher: publisher,
+                published_year: publishedYear,
+                stock: stock,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            const books = $('#books');
+            books.append(`
+            <tr id="book-${response.data.book_id}">
+                <td class="bg-white">${response.data.book_id}</td>
+                <td class="bg-white">${response.data.title}</td>
+                <td class="bg-white">${response.data.author}</td>
+                <td class="bg-white">${response.data.publisher}</td>
+                <td class="bg-white">${response.data.published_year}</td>
+                <td class="bg-white">${response.data.stock}</td>
+                <td class="bg-white">
+                    <button class="btn btn-primary" onclick="showEdit(${response.data.book_id})" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                    <button class="btn btn-danger" onclick="_delete(${response.data.book_id})">Hapus</button>
+                </td>
+            </tr>
+            `);
+        });
+    }
+
+    function showEdit(bookId) {
+        axios.get(
+        `${BASE_URL}/books/${bookId}`,
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            $('#editModal #bookId').val(response.data.book_id);
+            $('#editModal #title').val(response.data.title);
+            $('#editModal #author').val(response.data.author);
+            $('#editModal #publisher').val(response.data.publisher);
+            $('#editModal #published-year').val(response.data.published_year);
+            $('#editModal #stock').val(response.data.stock);
+        });
+    }
+
+    function edit() {
+        const bookId = $('#editModal #bookId').val();
+        const title = $('#editModal #title').val();
+        const author = $('#editModal #author').val();
+        const publisher = $('#editModal #publisher').val();
+        const publishedYear = $('#editModal #published-year').val();
+        const stock = $('#editModal #stock').val();
+
+        axios.patch(
+            `${BASE_URL}/books/${bookId}`,
+            {
+                title: title,
+                author: author,
+                publisher: publisher,
+                published_year: publishedYear,
+                stock: stock,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*', 
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            const book = $(`#book-${bookId}`);
+            book.empty()
+            book.append(`
+            <td class="bg-white">${response.data.book_id}</td>
+            <td class="bg-white">${response.data.title}</td>
+            <td class="bg-white">${response.data.author}</td>
+            <td class="bg-white">${response.data.publisher}</td>
+            <td class="bg-white">${response.data.published_year}</td>
+            <td class="bg-white">${response.data.stock}</td>
+            <td class="bg-white">
+                <button class="btn btn-primary" onclick="showEdit(${response.data.book_id})" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                <button class="btn btn-danger" onclick="_delete(${response.data.book_id})">Hapus</button>
+            </td>
+            `);
+        });
+    }
+
+    function _delete(bookId) {
+        axios.delete(
+            `${BASE_URL}/books/${bookId}`,
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            $(`#book-${bookId}`).remove();
+        });
+    }
 </script>
+
 </html>
