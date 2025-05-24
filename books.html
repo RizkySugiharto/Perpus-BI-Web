@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku | Admin Perpus BI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+</head>
+
+<body class="bg-body-secondary min-vh-100">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary px-5 py-3">
+        <h1 class="navbar-brand m-0 fs-3">Perpus BI</h1>
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+            aria-label="Toggle navigation"></button>
+        <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavId">
+            <ul class="navbar-nav mt-2 mt-lg-0 fs-5">
+                <li class="nav-item">
+                    <a class="nav-link" href="accounts.html">Akun</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="members.html">Anggota</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="books.html" aria-current="page">Buku</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="loans.html">Peminjaman</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout.html">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main class="p-5">
+        <h2 class="mb-3">Data Buku</h2>
+        <div class="table-responsive">
+            <table class="table table-primary table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">ID Buku</th>
+                        <th scope="col">Judul</th>
+                        <th scope="col">Pengarang</th>
+                        <th scope="col">Penerbit</th>
+                        <th scope="col">Tahun Terbit</th>
+                        <th scope="col">Stok</th>
+                        <th scope="col">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="books">
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const BASE_URL = 'https://perpus-bi-api.vercel.app';
+
+    axios.get(
+        `${BASE_URL}/books`,
+        {
+            withCredentials: true,
+            headers: {
+                'Access-Control-Allow-Origin': '*', 
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then(response => {
+        response.data.forEach(book => {
+            const books = $('#books');
+            books.append(`
+            <tr id="book-${book.book_id}">
+                <td class="bg-white">${book.book_id}</td>
+                <td class="bg-white">${book.title}</td>
+                <td class="bg-white">${book.author}</td>
+                <td class="bg-white">${book.publisher}</td>
+                <td class="bg-white">${book.published_year}</td>
+                <td class="bg-white">${book.stock}</td>
+                <td class="bg-white">
+                    <button class="btn btn-primary" onclick="edit(${book.book_id})">Edit</button>
+                    <button class="btn btn-danger" onclick="delete(${book.book_id})">Hapus</button>
+                </td>
+            </tr>
+            `);
+        })
+    });
+</script>
+</html>
