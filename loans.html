@@ -126,9 +126,9 @@
             <td class="bg-white">
                 ${response.data.taken
                     ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Diambil</button>`
-                    : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Diambil</button>`}
+                    : `<button class="btn btn-success" onclick="setTaken(${response.data.loan_id}, true)">Diambil</button>`}
                 ${response.data.returned
-                    ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Dikembalikan</button>`
+                    ? `<button class="btn btn-danger" onclick="setReturned(${response.data.loan_id}, false)">Dikembalikan</button>`
                     : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Dikembalikan</button>`}
             </td>
             `);
@@ -162,9 +162,9 @@
             <td class="bg-white">
                 ${response.data.taken
                     ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Diambil</button>`
-                    : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Diambil</button>`}
+                    : `<button class="btn btn-success" onclick="setTaken(${response.data.loan_id}, true)">Diambil</button>`}
                 ${response.data.returned
-                    ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Dikembalikan</button>`
+                    ? `<button class="btn btn-danger" onclick="setReturned(${response.data.loan_id}, false)">Dikembalikan</button>`
                     : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Dikembalikan</button>`}
             </td>
             `);
