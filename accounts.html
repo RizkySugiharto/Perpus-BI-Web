@@ -36,7 +36,12 @@
         </div>
     </nav>
     <main class="p-5">
-        <h2 class="mb-3">Data Akun</h2>
+        <div class="d-flex flex-row justify-content-between align-items-center mb-3">
+            <h2>Data Akun</h2>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
+                Tambah
+            </button>
+        </div>
         <div class="table-responsive">
             <table class="table table-primary table-bordered">
                 <thead>
@@ -53,6 +58,78 @@
             </table>
         </div>
     </main>
+
+    <!-- Modals -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-black">
+                    <h1 class="modal-title fs-5" id="createModalLabel">Tambah Akun</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-black">
+                    <div class="mb-3">
+                        <label for="email">Email: </label>
+                        <input type="email" name="email" id="email" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password">Password: </label>
+                        <input type="text" name="password" id="password" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role">Peran: </label>
+                        <select name="role" id="role" class="form-select border-black" required>
+                            <option value="anggota" selected>Anggota</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" name="activated" id="activated" class="form-check-input border-black">
+                        <label for="activated" class="form-check-label">Aktif? </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-black">
+                    <button type="button" class="btn btn-success" onclick="create()" data-bs-dismiss="modal">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-black">
+                    <h1 class="modal-title fs-5" id="editModalLabel">Edit Akun</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-black">
+                    <input type="hidden" name="accountId" id="accountId">
+                    <div class="mb-3">
+                        <label for="email">Email: </label>
+                        <input type="email" name="email" id="email" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password">Password: </label>
+                        <input type="text" name="password" id="password" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="published-year">Peran: </label>
+                        <select name="role" id="role" class="form-select border-black" required>
+                            <option value="anggota" selected>Anggota</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" name="activated" id="activated" class="form-check-input border-black">
+                        <label for="activated" class="form-check-label">Aktif? </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-black">
+                    <button type="button" class="btn btn-primary" id="btn-edit" data-bs-dismiss="modal" onclick="edit()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
@@ -76,19 +153,27 @@
             const accounts = $('#accounts');
             accounts.append(`
             <tr id="account-${account.account_id}">
-                <td class="bg-white">${account.account_id}</td>
-                <td class="bg-white">${account.email}</td>
-                <td class="bg-white">${account.role}</td>
-                <td class="bg-white">${account.activated}</td>
-                <td class="bg-white">
-                    ${account.activated
-                        ? `<button class="btn btn-danger btn-activate" onclick="deactivate(${account.account_id})">Nonaktifkan</button>`
-                        : `<button class="btn btn-success btn-deactivate" onclick="activate(${account.account_id})">Aktifkan</button>`}
-                </td>
+                ${getItemElement(account)}
             </tr>
             `);
         })
     });
+
+    function getItemElement(item) {
+        return `
+        <td class="bg-white">${item.account_id}</td>
+        <td class="bg-white">${item.email}</td>
+        <td class="bg-white">${item.role}</td>
+        <td class="bg-white">${item.activated}</td>
+        <td class="bg-white">
+            <button class="btn btn-primary" onclick="showEdit(${item.account_id})" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+            <button class="btn btn-danger" onclick="_delete(${item.account_id})">Hapus</button>
+            ${item.activated
+            ? `<button class="btn btn-danger btn-deactivate" onclick="deactivate(${item.account_id})">Nonaktifkan</button>`
+            : `<button class="btn btn-success btn-activate" onclick="activate(${item.account_id})">Aktifkan</button>`}
+        </td>
+        `
+    }
 
     function activate(accountId) {
         axios.patch(
@@ -106,15 +191,7 @@
         ).then(response => {
             const account = $(`#account-${accountId}`);
             account.empty()
-            account.append(`
-            <td class="bg-white">${response.data.account_id}</td>
-            <td class="bg-white">${response.data.email}</td>
-            <td class="bg-white">${response.data.role}</td>
-            <td class="bg-white">${response.data.activated}</td>
-            <td class="bg-white">
-                <button class="btn btn-danger btn-deactivate" onclick="deactivate(${response.data.account_id})">Nonaktifkan</button>
-            </td>
-            `);
+            account.append(getItemElement(response.data));
         });
     }
 
@@ -134,15 +211,106 @@
         ).then(response => {
             const account = $(`#account-${accountId}`);
             account.empty()
-            account.append(`
-            <td class="bg-white">${response.data.account_id}</td>
-            <td class="bg-white">${response.data.email}</td>
-            <td class="bg-white">${response.data.role}</td>
-            <td class="bg-white">${response.data.activated}</td>
-            <td class="bg-white">
-                <button class="btn btn-success btn-activate" onclick="activate(${response.data.account_id})">Aktifkan</button>
-            </td>
+            account.append(getItemElement(response.data));
+        });
+    }
+
+    function create() {
+        const email = $('#createModal #email').val();
+        const password = $('#createModal #password').val();
+        const role = $('#createModal #role').val();
+        const activated = $('#createModal #activated').is(':checked');
+
+        axios.post(
+            `${BASE_URL}/accounts`,
+            {
+                email: email,
+                password: password,
+                role: role,
+                activated: activated,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            const accounts = $('#accounts');
+            accounts.append(`
+            <tr id="account-${response.data.account_id}">
+                ${getItemElement(response.data)}
+            </tr>
             `);
+
+            $('#createModal #email').val('');
+            $('#createModal #password').val('');
+            $('#createModal #role').val('anggota');
+            $('#createModal #activated').attr('checked', false);
+        });
+    }
+
+    function showEdit(accountId) {
+        axios.get(
+        `${BASE_URL}/accounts/${accountId}`,
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            $('#editModal #accountId').val(accountId);
+            $('#editModal #email').val(response.data.email);
+            $('#editModal #password').val(response.data.password);
+            $('#editModal #role').val(response.data.role);
+            $('#editModal #activated').attr('checked', response.data.activated);
+        });
+    }
+
+    function edit() {
+        const accountId = $('#editModal #accountId').val();
+        const email = $('#editModal #email').val();
+        const password = $('#editModal #password').val();
+        const role = $('#editModal #role').val();
+        const activated = $('#editModal #activated').is(':checked');
+
+        axios.patch(
+            `${BASE_URL}/accounts/${accountId}`,
+            {
+                email: email,
+                password: password,
+                role: role,
+                activated: activated,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*', 
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            const account = $(`#account-${accountId}`);
+            account.empty()
+            account.append(getItemElement(response.data));
+        });
+    }
+
+    function _delete(accountId) {
+        axios.delete(
+            `${BASE_URL}/accounts/${accountId}`,
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            $(`#account-${accountId}`).remove();
         });
     }
 </script>

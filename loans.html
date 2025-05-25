@@ -99,6 +99,27 @@
         })
     });
 
+    function getItemElement(item) {
+        return `
+        <td class="bg-white">${item.NIM}</td>
+        <td class="bg-white"><a href="/accounts.html#account-${item.account_id}" class="text-decoration-none">${item.account_id}</a></td>
+        <td class="bg-white">${item.name}</td>
+        <td class="bg-white">${item.class_name}</td>
+        <td class="bg-white">${item.address}</td>
+        <td class="bg-white">${item.birthdate}</td>
+        <td class="bg-white">${item.gender}</td>
+        <td class="bg-white">
+            ${loan.taken
+                ? `<button class="btn btn-danger" onclick="setTaken(${loan.loan_id}, false)">Diambil</button>`
+                : `<button class="btn btn-success" onclick="setTaken(${loan.loan_id}, true)">Diambil</button>`}
+            ${loan.returned
+                ? `<button class="btn btn-danger" onclick="setReturned(${loan.loan_id}, false)">Dikembalikan</button>`
+                : `<button class="btn btn-success" onclick="setReturned(${loan.loan_id}, true)">Dikembalikan</button>`}
+            <button class="btn btn-danger" onclick="_delete(${item.NIM})">Hapus</button>
+        </td>
+        `
+    }
+
     function setTaken(loanId, value) {
         axios.patch(
             `${BASE_URL}/loans/${loanId}`,
@@ -168,6 +189,21 @@
                     : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Dikembalikan</button>`}
             </td>
             `);
+        });
+    }
+
+    function _delete(NIM) {
+        axios.delete(
+            `${BASE_URL}/members/${NIM}`,
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            $(`#member-${NIM}`).remove();
         });
     }
 </script>
