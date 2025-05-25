@@ -36,7 +36,12 @@
         </div>
     </nav>
     <main class="p-5">
-        <h2 class="mb-3">Data Peminjaman</h2>
+        <div class="d-flex flex-row justify-content-between align-items-center mb-3">
+            <h2>Data Peminjaman</h2>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
+                Tambah
+            </button>
+        </div>
         <div class="table-responsive">
             <table class="table table-primary table-bordered">
                 <thead>
@@ -56,6 +61,47 @@
             </table>
         </div>
     </main>
+
+    <!-- Modals -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-black">
+                    <h1 class="modal-title fs-5" id="createModalLabel">Tambah Peminjaman</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-black">
+                    <div class="mb-3">
+                        <label for="account-id">ID Akun: </label>
+                        <input type="number" name="account-id" id="account-id" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="book-id">ID Buku: </label>
+                        <input type="number" name="book-id" id="book-id" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loan-date">Tanggal Peminjaman: </label>
+                        <input type="date" name="loan-date" id="loan-date" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="return-date">Tanggal Pengembalian: </label>
+                        <input type="date" name="return-date" id="return-date" class="form-control border-black" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" name="taken" id="taken" class="form-check-input border-black">
+                        <label for="taken" class="form-check-label">Sudah Diambil? </label>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" name="returned" id="returned" class="form-check-input border-black">
+                        <label for="returned" class="form-check-label">Sudah Dikembalikan? </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-black">
+                    <button type="button" class="btn btn-success" onclick="create()" data-bs-dismiss="modal">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
@@ -69,6 +115,9 @@
         `${BASE_URL}/loans`,
         {
             withCredentials: true,
+            params: {
+                all: true
+            },
             headers: {
                 'Access-Control-Allow-Origin': '*', 
                 'Content-Type': 'application/json'
@@ -79,21 +128,7 @@
             const loans = $('#loans');
             loans.append(`
             <tr id="loan-${loan.loan_id}">
-                <td class="bg-white">${loan.loan_id}</td>
-                <td class="bg-white"><a href="/accounts.html#account-${loan.account_id}" class="text-decoration-none">${loan.account_id}</a></td>
-                <td class="bg-white"><a href="/books.html#book-${loan.book_id}" class="text-decoration-none">${loan.book_id}</a></td>
-                <td class="bg-white">${loan.loan_date}</td>
-                <td class="bg-white">${loan.return_date}</td>
-                <td class="bg-white">${loan.taken}</td>
-                <td class="bg-white">${loan.returned}</td>
-                <td class="bg-white">
-                    ${loan.taken
-                        ? `<button class="btn btn-danger" onclick="setTaken(${loan.loan_id}, false)">Diambil</button>`
-                        : `<button class="btn btn-success" onclick="setTaken(${loan.loan_id}, true)">Diambil</button>`}
-                    ${loan.returned
-                        ? `<button class="btn btn-danger" onclick="setReturned(${loan.loan_id}, false)">Dikembalikan</button>`
-                        : `<button class="btn btn-success" onclick="setReturned(${loan.loan_id}, true)">Dikembalikan</button>`}
-                </td>
+                ${getItemElement(loan)}
             </tr>
             `);
         })
@@ -101,23 +136,65 @@
 
     function getItemElement(item) {
         return `
-        <td class="bg-white">${item.NIM}</td>
+        <td class="bg-white">${item.loan_id}</td>
         <td class="bg-white"><a href="/accounts.html#account-${item.account_id}" class="text-decoration-none">${item.account_id}</a></td>
-        <td class="bg-white">${item.name}</td>
-        <td class="bg-white">${item.class_name}</td>
-        <td class="bg-white">${item.address}</td>
-        <td class="bg-white">${item.birthdate}</td>
-        <td class="bg-white">${item.gender}</td>
+        <td class="bg-white"><a href="/books.html#book-${item.book_id}" class="text-decoration-none">${item.book_id}</a></td>
+        <td class="bg-white">${item.loan_date}</td>
+        <td class="bg-white">${item.return_date}</td>
+        <td class="bg-white">${item.taken}</td>
+        <td class="bg-white">${item.returned}</td>
         <td class="bg-white">
-            ${loan.taken
-                ? `<button class="btn btn-danger" onclick="setTaken(${loan.loan_id}, false)">Diambil</button>`
-                : `<button class="btn btn-success" onclick="setTaken(${loan.loan_id}, true)">Diambil</button>`}
-            ${loan.returned
-                ? `<button class="btn btn-danger" onclick="setReturned(${loan.loan_id}, false)">Dikembalikan</button>`
-                : `<button class="btn btn-success" onclick="setReturned(${loan.loan_id}, true)">Dikembalikan</button>`}
-            <button class="btn btn-danger" onclick="_delete(${item.NIM})">Hapus</button>
+            ${item.taken
+                ? `<button class="btn btn-danger" onclick="setTaken(${item.loan_id}, false)">Diambil</button>`
+                : `<button class="btn btn-success" onclick="setTaken(${item.loan_id}, true)">Diambil</button>`}
+            ${item.returned
+                ? `<button class="btn btn-danger" onclick="setReturned(${item.loan_id}, false)">Dikembalikan</button>`
+                : `<button class="btn btn-success" onclick="setReturned(${item.loan_id}, true)">Dikembalikan</button>`}
+            <button class="btn btn-danger" onclick="_delete(${item.loan_id})">Hapus</button>
         </td>
         `
+    }
+
+    function create() {
+        const accountId = $('#createModal #account-id').val();
+        const bookId = $('#createModal #book-id').val();
+        const loanDate = $('#createModal #loan-date').val();
+        const returnDate = $('#createModal #return-date').val();
+        const taken = $('#createModal #taken').is(':checked');
+        const returned = $('#createModal #returned').is(':checked');
+        
+        axios.post(
+            `${BASE_URL}/loans`,
+            {
+                account_id: accountId,
+                book_id: bookId,
+                loan_date: loanDate,
+                return_date: returnDate,
+                taken: taken,
+                returned: returned,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then(response => {
+            const loans = $('#loans');
+            loans.append(`
+            <tr id="loan-${response.data.loan_id}">
+                ${getItemElement(response.data)}
+            </tr>
+            `);
+
+            $('#createModal #account-id').val();
+            $('#createModal #book-id').val();
+            $('#createModal #loan-date').val();
+            $('#createModal #return-date').val();
+            $('#createModal #taken').attr('checked', false);
+            $('#createModal #returned').attr('checked', false);
+        });
     }
 
     function setTaken(loanId, value) {
@@ -136,23 +213,7 @@
         ).then(response => {
             const loan = $(`#loan-${loanId}`);
             loan.empty()
-            loan.append(`
-            <td class="bg-white">${response.data.loan_id}</td>
-            <td class="bg-white"><a href="/accounts.html#account-${response.data.account_id}" class="text-decoration-none">${response.data.account_id}</a></td>
-            <td class="bg-white"><a href="/books.html#book-${response.data.book_id}" class="text-decoration-none">${response.data.book_id}</a></td>
-            <td class="bg-white">${response.data.loan_date}</td>
-            <td class="bg-white">${response.data.return_date}</td>
-            <td class="bg-white">${response.data.taken}</td>
-            <td class="bg-white">${response.data.returned}</td>
-            <td class="bg-white">
-                ${response.data.taken
-                    ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Diambil</button>`
-                    : `<button class="btn btn-success" onclick="setTaken(${response.data.loan_id}, true)">Diambil</button>`}
-                ${response.data.returned
-                    ? `<button class="btn btn-danger" onclick="setReturned(${response.data.loan_id}, false)">Dikembalikan</button>`
-                    : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Dikembalikan</button>`}
-            </td>
-            `);
+            loan.append(getItemElement(response.data));
         });
     }
 
@@ -172,29 +233,13 @@
         ).then(response => {
             const loan = $(`#loan-${loanId}`);
             loan.empty()
-            loan.append(`
-            <td class="bg-white">${response.data.loan_id}</td>
-            <td class="bg-white"><a href="/accounts.html#account-${response.data.account_id}" class="text-decoration-none">${response.data.account_id}</a></td>
-            <td class="bg-white"><a href="/books.html#book-${response.data.book_id}" class="text-decoration-none">${response.data.book_id}</a></td>
-            <td class="bg-white">${response.data.loan_date}</td>
-            <td class="bg-white">${response.data.return_date}</td>
-            <td class="bg-white">${response.data.taken}</td>
-            <td class="bg-white">${response.data.returned}</td>
-            <td class="bg-white">
-                ${response.data.taken
-                    ? `<button class="btn btn-danger" onclick="setTaken(${response.data.loan_id}, false)">Diambil</button>`
-                    : `<button class="btn btn-success" onclick="setTaken(${response.data.loan_id}, true)">Diambil</button>`}
-                ${response.data.returned
-                    ? `<button class="btn btn-danger" onclick="setReturned(${response.data.loan_id}, false)">Dikembalikan</button>`
-                    : `<button class="btn btn-success" onclick="setReturned(${response.data.loan_id}, true)">Dikembalikan</button>`}
-            </td>
-            `);
+            loan.append(getItemElement(response.data));
         });
     }
 
-    function _delete(NIM) {
+    function _delete(loanId) {
         axios.delete(
-            `${BASE_URL}/members/${NIM}`,
+            `${BASE_URL}/loans/${loanId}`,
             {
                 withCredentials: true,
                 headers: {
@@ -203,7 +248,7 @@
                 }
             }
         ).then(response => {
-            $(`#member-${NIM}`).remove();
+            $(`#loan-${loanId}`).remove();
         });
     }
 </script>
