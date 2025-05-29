@@ -10,30 +10,7 @@
 </head>
 
 <body class="bg-body-secondary min-vh-100">
-    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary px-5 py-3">
-        <h1 class="navbar-brand m-0 fs-3">Perpus BI</h1>
-        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
-            aria-label="Toggle navigation"></button>
-        <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavId">
-            <ul class="navbar-nav mt-2 mt-lg-0 fs-5">
-                <li class="nav-item">
-                    <a class="nav-link" href="accounts.html">Akun</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="members.html" aria-current="page">Anggota</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="books.html">Buku</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="loans.html">Peminjaman</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.html">Logout</a>
-                </li>
-            </ul>
-        </div>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary px-5 py-3" id="navbar">
     </nav>
     <main class="p-5">
         <div class="d-flex flex-row justify-content-between align-items-center mb-3">
@@ -156,15 +133,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Notifications -->
+    <div id="notifications"></div>
 </body>
+<script src="/js/const.js"></script>
+<script src="/js/notifications.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/navbar.js"></script>
+<script src="/js/isLoggedIn.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
     crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    const BASE_URL = 'https://perpus-bi-api.vercel.app';
-
+    checkIfLoggedIn('admin');
+    initNotification();
+    
     axios.get(
         `${BASE_URL}/members`,
         {
@@ -183,6 +168,8 @@
             </tr>
             `);
         })
+    }).catch(() => {
+        addNotification('Gagal memuat data. Coba Lagi', 'danger');
     });
 
     function getItemElement(item) {
@@ -209,20 +196,26 @@
         const address = $('#createModal #address').val();
         const birthdate = $('#createModal #birthdate').val();
         const gender = $('#createModal #gender').val();
+        let response;
 
-        let response = await axios.get(
-            `${BASE_URL}/accounts/${accountId}`,
-            {
-                withCredentials: true,
-                headers: {
-                    'Access-Control-Allow-Origin': '*', 
-                    'Content-Type': 'application/json'
+        try {
+            response = await axios.get(
+                `${BASE_URL}/accounts/${accountId}`,
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*', 
+                        'Content-Type': 'application/json'
+                    }
                 }
+            )
+            
+            if (response.status != 200 || response.status == 404) {
+                addNotification('ID Akun tidak ditemukan. Coba yang lain', 'danger');
+                return;
             }
-        )
-
-        if (response.status != 200) {
-            return;
+        } catch (error) {
+            addNotification('Gagal menemukan ID Akun. Coba lagi', 'danger');
         }
 
 
@@ -252,13 +245,17 @@
             </tr>
             `);
 
-        $('#createModal #NIM').val('');
-        $('#createModal #account-id').val('');
-        $('#createModal #name').val('');
-        $('#createModal #class-name').val('');
-        $('#createModal #address').val('');
-        $('#createModal #birthdate').val('');
-        $('#createModal #gender').val('');
+            $('#createModal #NIM').val('');
+            $('#createModal #account-id').val('');
+            $('#createModal #name').val('');
+            $('#createModal #class-name').val('');
+            $('#createModal #address').val('');
+            $('#createModal #birthdate').val('');
+            $('#createModal #gender').val('');
+
+            addNotification('Anggota berhasil ditambahkan', 'success');
+        }).catch(() => {
+            addNotification('Data gagal ditambahkan. Coba Lagi', 'danger');
         });
     }
 
@@ -280,6 +277,8 @@
             $('#editModal #address').val(response.data.address);
             $('#editModal #birthdate').val(response.data.birthdate);
             $('#editModal #gender').val(response.data.gender);
+        }).catch(() => {
+            addNotification('Gagal memuat data. Coba Lagi', 'danger');
         });
     }
 
@@ -312,10 +311,18 @@
             const member = $(`#member-${NIM}`);
             member.empty()
             member.append(getItemElement(response.data));
+
+            addNotification('Data anggota berhasil diperbaharui', 'success');
+        }).catch(() => {
+            addNotification('Data gagal diperbaharui. Coba Lagi', 'danger');
         });
     }
 
     function _delete(NIM) {
+        if (!confirm("Data akan dihapus permanen dan tidak akan bisa dikembalikan lagi. Apakah anda yakin?")) {
+            return;    
+        }
+
         axios.delete(
             `${BASE_URL}/members/${NIM}`,
             {
@@ -327,6 +334,10 @@
             }
         ).then(response => {
             $(`#member-${NIM}`).remove();
+
+            addNotification('Anggota telah dihapus permanen', 'success');
+        }).catch(() => {
+            addNotification('Data gagal dihapus. Coba Lagi', 'danger');
         });
     }
 </script>
