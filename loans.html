@@ -75,7 +75,7 @@ crossorigin="anonymous"></script>
     function getItemElement(item) {
         return `
         <td class="bg-white">${item.loan_id}</td>
-        <td class="bg-white"><a href="/book-detail.html?book_id=${item.book_id}" class="text-decoration-none">${item.book_id}</a></td>
+        <td class="bg-white"><a href="/book-detail.html?id=${item.book_id}" class="text-decoration-none">${item.book_id}</a></td>
         <td class="bg-white">${item.loan_date}</td>
         <td class="bg-white">${item.return_date}</td>
         <td class="bg-white">${item.taken}</td>
